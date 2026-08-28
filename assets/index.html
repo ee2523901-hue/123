@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errDiv = document.createElement("div");
+      errDiv.style.position = "fixed";
+      errDiv.style.top = "10px";
+      errDiv.style.left = "10px";
+      errDiv.style.width = "95%";
+      errDiv.style.background = "rgba(220, 38, 38, 0.95)";
+      errDiv.style.color = "white";
+      errDiv.style.padding = "20px";
+      errDiv.style.zIndex = "999999";
+      errDiv.style.fontFamily = "monospace";
+      errDiv.style.fontSize = "14px";
+      errDiv.style.borderRadius = "8px";
+      errDiv.style.boxShadow = "0 10px 25px rgba(0,0,0,0.5)";
+      errDiv.innerHTML = `<strong>⚠️ 偵測到腳本錯誤 (JS ERROR):</strong><br>${message}<br><br><b>來源檔案:</b> ${source}<br><b>錯誤位置:</b> 第 ${lineno} 行，第 ${colno} 字元`;
+      document.body.appendChild(errDiv);
+      return false;
+    };
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GUNFIGHT // 鋼鐵機靈：極限科幻戰術射擊遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- 引入 Three.js 核心庫 (r128) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- 主應用介面容器 -->
+  <div id="app-container">
+    
+    <!-- 全球統一頂部導航欄 (Roblox Rivals 風格) -->
+    <header id="global-nav-header" class="global-nav-header">
+      <div class="logo-container">
+        <div class="logo-icon"></div>
+        <h1 class="logo-text">GUNFIGHT</h1>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-target="lobby">大廳 HOME</button>
+        <button class="nav-tab" data-target="store">武器庫 & 商店 LOCKER</button>
+        <button class="nav-tab" data-target="stats">生涯數據 STATS</button>
+        <button class="nav-tab play-btn" data-target="maps">進入戰場 PLAY</button>
+      </nav>
+      <div class="user-status">
+        <div class="credits-display">
+          <span class="credits-label">CREDITS:</span>
+          <span class="credits-amount">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 數位粒子背景容器 -->
+    <div id="digital-particles-container">
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+      <div class="shard"></div>
+    </div>
+
+    <!-- ==================== 1. 大廳/首頁畫面 ==================== -->
+    <div id="lobby-screen" class="screen active">
+      <div class="lobby-content">
+        <nav class="lobby-menu">
+          <button class="menu-item btn-battle">進入戰場 BATTLE</button>
+          <button class="menu-item btn-store">武器庫 & 商店 STORE</button>
+          <button class="menu-item btn-training">訓練靶場 RANGE</button>
+          <button class="menu-item btn-stats">戰績分析 STATS</button>
+        </nav>
+
+        <div class="lobby-preview-container">
+          <!-- 3D 旋轉全息人像掛載點 -->
+          <div id="lobby-preview-canvas-container" class="preview-3d-canvas"></div>
+          
+          <!-- 特務說明資訊 -->
+          <div class="operator-details-card">
+            <!-- 由 app.js 動態渲染 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 2. 商店與武器庫畫面 ==================== -->
+    <div id="store-screen" class="screen">
+      <div class="store-container">
+        <div class="store-main">
+          <div class="store-tabs">
+            <button class="store-tab-btn active" data-tab="weapons">主副槍械 FIREARMS</button>
+            <button class="store-tab-btn" data-tab="defense">防具與近戰 DEFENSE</button>
+            <button class="store-tab-btn" data-tab="explosives">戰術炸彈 BOMBS</button>
+            <button class="store-tab-btn" data-tab="skins">特務造型 OUTFITS</button>
+          </div>
+          <!-- 商店卡片列表 -->
+          <div class="store-items-grid">
+            <!-- 由 app.js 動態渲染 -->
+          </div>
+        </div>
+
+        <!-- 側邊欄細節與購買/配備 -->
+        <aside class="store-sidebar">
+          <div>
+            <div class="sidebar-title-section">
+              <span class="sidebar-rarity operator-rarity rarity-Common">Rare</span>
+              <h3 class="sidebar-name">強襲步槍</h3>
+            </div>
+            
+            <!-- 寫實 3D 槍械/刀劍預覽視窗 (Roblox Rivals 風格) -->
+            <div id="store-3d-preview-container" class="store-3d-preview-container"></div>
+
+            <!-- 數值條 -->
+            <div class="sidebar-stats">
+              <!-- 由 app.js 動態渲染 -->
+            </div>
+            <p class="sidebar-desc">全能型突擊步槍，中遠距離表現優異。</p>
+          </div>
+          
+          <div class="sidebar-action-container">
+            <!-- 購買與配備按鈕 -->
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ==================== 3. 地圖選擇畫面 ==================== -->
+    <div id="maps-screen" class="screen">
+      <div class="maps-container">
+        <div class="maps-grid">
+          <!-- 由 app.js 動態渲染 -->
+        </div>
+        <footer class="maps-footer">
+          <button class="glow-btn start-battle-btn">進入戰區 DEPLOY</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ==================== 4. 戰績分析畫面 ==================== -->
+    <div id="stats-screen" class="screen">
+
+      <div class="stats-container">
+        <div class="stats-card">
+          <!-- 由 app.js 動態渲染 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 5. Three.js 3D 遊戲畫面 ==================== -->
+    <div id="three-game-container">
+      
+      <!-- 渲染安裝點 -->
+      <div id="canvas-mount" style="width: 100%; height: 100%;"></div>
+
+      <!-- 畫面正中心準星 -->
+      <div class="crosshair">
+        <div class="crosshair-center"></div>
+      </div>
+
+      <!-- 受傷紅邊閃爍 -->
+      <div id="hurt-overlay"></div>
+      <div id="scope-overlay"></div>
+
+      <!-- 指標鎖定提示 / 暫停選單 -->
+      <div id="lock-prompt">
+        <h2 class="lock-title">點擊畫面進入戰鬥</h2>
+        <p class="lock-desc">
+          點擊畫面鎖定視角，以滑鼠進行瞄準射擊。<br>
+          W, A, S, D 移動 / R 裝填 / 1, 2, 3 切換裝備 / ESC 解鎖滑鼠。
+        </p>
+        <button id="btn-lock-prompt-exit" class="glow-btn" style="border-color: var(--neon-orange); color: var(--neon-orange); margin-top: 10px;">結束戰鬥 / 返回大廳 EXIT</button>
+      </div>
+
+      <!-- HUD 面板疊加 -->
+      <div id="game-hud">
+        
+        <!-- 頂部計分板 -->
+        <div class="hud-top">
+          <div class="hud-scoreboard">
+            <div class="scoreboard-team blue-team">
+              <span class="team-label">ALLY</span>
+              <span id="score-blue" class="team-score">0</span>
+            </div>
+            <div class="scoreboard-divider">
+              <span class="team-label" style="color: var(--text-muted)">ROUND TIMER</span>
+              <span id="hud-time" class="match-timer">15:00</span>
+            </div>
+            <div class="scoreboard-team red-team">
+              <span class="team-label">ENEMY</span>
+              <span id="score-red" class="team-score">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 擊殺廣播廣播饋送 (Kill Feed) -->
+        <div id="hud-killfeed" class="hud-killfeed"></div>
+
+        <!-- 訓練靶場專屬 HUD 面板 -->
+        <div id="training-panel">
+          <div style="font-size: 11px; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px; font-weight: 800;">訓練指標</div>
+          <div class="training-stat-row">
+            <span>命中率:</span>
+            <span id="train-accuracy" class="training-stat-val">0.0%</span>
+          </div>
+          <div class="training-stat-row">
+            <span>擊中數:</span>
+            <span id="train-hits" class="training-stat-val">0</span>
+          </div>
+          <div class="training-stat-row" style="display: none;">
+            <span>擊破數:</span>
+            <span id="train-kills" class="training-stat-val">0</span>
+          </div>
+          <button id="btn-end-training" class="glow-btn">結束訓練 EXIT</button>
+        </div>
+
+        <!-- 裝彈提醒 -->
+        <div id="reload-prompt">PRESS 'R' TO RELOAD AMMO</div>
+
+        <!-- 底部狀態列 -->
+        <div class="hud-bottom">
+          <!-- 玩家血量護甲 -->
+          <div class="hud-player-status">
+            <!-- 護甲 -->
+            <div class="status-bar-container">
+              <span class="status-icon">AP</span>
+              <div class="status-bar-bg">
+                <div id="hud-shield" class="status-bar-fill-amount shield" style="width: 100%"></div>
+              </div>
+              <span id="hud-shield-val" class="status-value">100</span>
+            </div>
+            <!-- 血量 -->
+            <div class="status-bar-container">
+              <span class="status-icon">HP</span>
+              <div class="status-bar-bg">
+                <div id="hud-hp" class="status-bar-fill-amount hp" style="width: 100%"></div>
+              </div>
+              <span id="hud-hp-val" class="status-value">100</span>
+            </div>
+          </div>
+
+          <!-- 武器彈藥 -->
+          <div class="hud-weapon-status">
+            <div class="weapon-readout">
+              <span id="hud-weapon-name" class="weapon-name-display">強襲步槍</span>
+              <span id="hud-weapon-type" class="weapon-type-display">Assault Rifle</span>
+            </div>
+            <div class="ammo-readout">
+              <span id="hud-ammo-curr" class="ammo-current">30</span>
+              <span class="ammo-divider">/</span>
+              <span id="hud-ammo-max" class="ammo-max">90</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 小地圖雷達 -->
+        <div id="radar-container">
+          <canvas id="radar-canvas" width="120" height="120"></canvas>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== 6. 戰後結算彈出視窗 ==================== -->
+    <div id="match-result-overlay" class="match-result-overlay">
+      <div class="result-card">
+        <h2 id="result-title" class="result-title victory">任務成功 VICTORY</h2>
+        
+        <div id="result-stats-details" class="result-stats-grid">
+          <!-- 由 game.js 動態渲染 -->
+        </div>
+
+        <div class="result-cr-earned">
+          獲得 Combat Credits: <span id="result-cr-earned-value">+0 CR</span>
+        </div>
+
+        <button class="glow-btn btn-result-close" style="width: 100%;">返回大廳 CONFIRM</button>
+      </div>
+    </div>
+
+    <!-- 回合制倒數計時覆蓋圖 (Rivals 風格) -->
+    <div id="round-countdown-overlay" class="round-countdown-overlay" style="display: none;">
+      <div class="countdown-card">
+        <h1 class="countdown-title">ROUND 1</h1>
+        <p class="countdown-subtitle">準備戰鬥 READY...</p>
+      </div>
+    </div>
+
+    <!-- 回合結束勝負橫幅 -->
+    <div id="round-result-banner" class="round-result-banner" style="display: none;">
+      <h1 class="result-banner-text">ROUND WON</h1>
+    </div>
+
+  </div>
+
+  <!-- 引入遊戲代碼 -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
